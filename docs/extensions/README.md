@@ -34,3 +34,9 @@ GR IV 系列入口为卡根目录的 `00078560.636` 与 `DEVELOP.MOD`，关机�
 Keep the original and a second copy on your computer for each body. Verify complete SHA-256 readbacks and the visible screen. Empty readbacks indicate failure or incomplete execution. Archive failed attempts before investigating; do not retry blindly. Remove the startup script and disable Script after completion.
 
 每台机身单独保存原图及电脑副本，以完整 SHA-256 和实际画面核对结果。空读回不是成功，失败时保留现场并排查，结束后移除启动脚本并关闭 Script。已经覆盖且未备份的原图无法由这些工具找回。
+
+## File-operation checks / 文件操作检查
+
+Before writing internal resources, test a small SD-to-SD copy and verify its complete contents on the computer. See the [TTL file-operation findings](../research/gr4-ttl-filecopy-filesystems.md) for the reported failure and its limits. This preflight recommendation has not been added to or validated as part of the existing templates.
+
+写入前先用小文件核对卡内复制，再在电脑上校验完整内容。该预检建议尚未集成进现有模板，不能当作已完成的保护功能。
