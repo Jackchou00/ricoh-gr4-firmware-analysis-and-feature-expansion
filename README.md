@@ -2,57 +2,65 @@
 
 # Ricoh GR IV Firmware Analysis and Feature Expansion
 
-[English](#english) · [简体中文](#中文)
-
 ## English
 
-Firmware research and shutdown-image tools for Ricoh GR cameras. Includes firmware-container analysis, read-only USB/MTP probes, factory-menu notes, and scripts to back up, replace and restore shutdown images.
+Research into Ricoh GR IV firmware, internal interfaces and possible feature extensions. The repository contains analysis notes, offline tools, read-only device probes and reproducible experiments. Feature work currently includes custom shutdown images through the factory-script interface.
 
-Image replacement runs through an SD-card TTL script and does not require flashing firmware. Firmware, extracted resources and artwork are not included.
+### Firmware research
 
-### Camera workflows
+| Area | Current work |
+| --- | --- |
+| Firmware container | Header and version fields, frame decoding, whole-file checksum |
+| System layout | RTOS load mapping, embedded Linux device tree and memory regions |
+| USB / MTP | Read-only enumeration and the limits of the tested USB modes |
+| Factory and debug interfaces | Persistent Camera Mode state, Version page, key-event paths and TTL startup scripts |
+| Model identification | GR IV, HDF and Monochrome product IDs and resource selection |
 
-| Camera | Guide | Status |
-| --- | --- | --- |
-| GR IV | [GR IV family](docs/gr4-family-shutdown-workflow.md) | Original replacement tested on one body; identification tested on 1.11 |
-| GR IV HDF | [GR IV family](docs/gr4-family-shutdown-workflow.md) | Identification and target path tested on 1.11 |
-| GR IV Monochrome | [GR IV family](docs/gr4-family-shutdown-workflow.md) | Identification and target path tested; exact firmware version not recorded |
-| GR IIIx Urban Edition 1.60 | [Urban workflow](docs/gr3x-urban-160-shutdown-image.md) | Replacement, restoration and full readback verified on one body |
+Start with the [research index](docs/research/README.md) and [developer guide](docs/research/developer-guide.md). The [research log](docs/research-log.md) records experiments and corrections; [open questions](docs/research/open-questions.md) lists work that still needs evidence. Most detailed reports are currently in Chinese.
 
-The new combined GR IV-family workflows and Urban backup/restore wrappers have offline tests, but have not been tested end to end on cameras. Other models and firmware versions are unverified.
+#### Offline analysis
 
-### Getting started
-
-Read your camera's guide before running any script. Generate factory-menu entry files on your computer:
-
-```sh
-# GR IV family
-python3 tools/create_factory_entry.py ./entry
-
-# GR IIIx Urban Edition 1.60
-python3 tools/create_factory_entry.py ./entry-urban --model gr3x-urban-160
-```
-
-The GR IV-family guide covers automatic model selection, backup, replacement and restoration. It uses a FAT32 card and a 720×480 JPEG matching the original file's byte length. Urban uses a separate two-stage installation method; do not use GR IV templates on it.
-
-Always save the original image on your computer before replacing it. Keep backups separate for each camera, compare complete SHA-256 readbacks, and check the actual shutdown screen. An empty readback is a failed or incomplete attempt. Remove `script/startup.ttl` and disable Script when finished.
-
-The original standard GR IV `*-goodbye.ttl.example` templates still use `GBBACK.JPG`. Existing users can keep that workflow; do not mix its backup names with family templates or use it on HDF/Monochrome. A lost original cannot be recovered by backing up an already modified image.
-
-### Tools and documentation
-
-- [Firmware and shutdown-image research](docs/firmware-and-shutdown-image-research.md)
-- [Debug mode and factory-menu analysis](docs/gr4-debug-mode-analysis.md)
-- [GR IV-family model identification](docs/gr4-model-identification.md)
-- [Research log](docs/research-log.md)
-- [tools/](tools/): firmware inspection, USB/MTP probes, JPEG preparation and script generators
-- [examples/](examples/): TTL templates
-
-Copying TTL templates needs no Python. Entry generation and basic analysis use Python 3. GR IV-family Python tools and the full test suite require Python 3.10+; image encoding requires Pillow. MTP probing requires PyUSB.
+Obtain a firmware file yourself. These commands inspect or decode a local container without connecting to a camera:
 
 ```sh
-python3 -m unittest discover -s tests -v  # Python 3.10+ and Pillow
+python3 tools/inspect_firmware.py /path/to/fwdc248b.bin
+python3 tools/inspect_firmware.py /path/to/fwdc248b.bin --unpack /tmp/gr4-decoded.bin
 ```
+
+Record the model, firmware version and sample SHA-256 with each finding. Distinguish file offsets from runtime addresses, and static analysis from camera observations. See the developer guide for the documented RTOS mapping and a contribution checklist.
+
+Firmware, extracted system files, device readbacks and private artwork are not distributed. No installable modified firmware or general-purpose camera SDK is provided. Host-side tests do not emulate the camera hardware.
+
+### Feature expansion
+
+#### Custom shutdown images
+
+[Shutdown-image guides](docs/extensions/README.md) cover the GR IV family and GR IIIx Urban Edition 1.60, with separate backup, write, readback and restore procedures. Identification and target paths have physical evidence; newer combined templates and wrappers are not fully camera-qualified. Keep a computer backup of each body's original before writing.
+
+### Repository layout
+
+```text
+docs/
+  research/       Research index, developer guide and open questions
+  extensions/     Feature extension guides and experiments
+  *.md            Existing technical reports and experiment log
+tools/            Offline analysis, device probes and workflow generators
+examples/         TTL experiments and feature templates
+tests/            Host-side checks and script control-flow models
+```
+
+[Documentation](docs/README.md) · [Tool reference](tools/README.md) · [Examples](examples/README.md) · [Contributing](CONTRIBUTING.md)
+
+### Development
+
+Use Python 3.10+ and Pillow for the complete test suite. Individual analysis tools may have fewer dependencies; see [tools](tools/README.md).
+
+```sh
+python3 -m pip install Pillow
+python3 -m unittest discover -s tests -v
+```
+
+Contributions can include address maps, format documentation, read-only probes, reproducible findings and feature experiments. Include the evidence and limitations, rather than only the final result. See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ### License
 
@@ -64,53 +72,63 @@ Camera modifications carry a risk of data loss or malfunction. Results apply onl
 
 ## 中文
 
-理光 GR 固件研究与关机图片工具，包含固件格式分析、USB/MTP 只读探测、工厂菜单记录，以及关机图片备份、替换和恢复脚本。
+本项目研究理光 GR IV 的固件结构、内部接口和功能扩展可能性，收录分析记录、离线工具、只读探针及可复现实验。目前的功能扩展包括通过工厂脚本接口自定义关机画面。
 
-图片替换通过 SD 卡上的 TTL 脚本执行，无需刷写固件。仓库不提供固件、解包资源或图片素材。
+### 固件研究
 
-### 机型与操作指南
+| 方向 | 已有内容 |
+| --- | --- |
+| 固件容器 | 包头、版本字段、帧解码和整文件校验 |
+| 系统布局 | RTOS 装载映射、内嵌 Linux 设备树及内存区域 |
+| USB / MTP | 只读枚举及已测试 USB 模式的能力边界 |
+| 工厂与调试接口 | Camera Mode 持久化、Version 页面、按键事件路径及 TTL 启动脚本 |
+| 机型识别 | GR IV、HDF、Monochrome 产品 ID 与资源选择 |
 
-| 机型 | 指南 | 验证情况 |
-| --- | --- | --- |
-| GR IV | [GR IV 系列](docs/gr4-family-shutdown-workflow.zh-CN.md) | 原始替换流程在一台机身上成功；机型识别在 1.11 上验证 |
-| GR IV HDF | [GR IV 系列](docs/gr4-family-shutdown-workflow.zh-CN.md) | 机型识别和目标路径在 1.11 上验证 |
-| GR IV Monochrome | [GR IV 系列](docs/gr4-family-shutdown-workflow.zh-CN.md) | 机型识别和目标路径已验证，精确固件版本未记录 |
-| GR IIIx Urban Edition 1.60 | [Urban 流程](docs/gr3x-urban-160-shutdown-image.md) | 一台机身完成替换、恢复及完整读回校验 |
+从[研究索引](docs/research/README.md)和[开发者入门](docs/research/developer-guide.md)开始。[研究日志](docs/research-log.md)保留实验过程与结论修订，[待研究问题](docs/research/open-questions.md)列出仍需证据的方向。
 
-新增 GR IV 系列组合流程和 Urban 备份／恢复工具通过了离线测试，尚未整套上机验证。其他机型和固件版本未经验证。
+#### 离线分析
 
-### 使用
-
-执行脚本前，请先阅读对应机型的指南。在电脑上生成工厂菜单入口文件：
-
-```sh
-# GR IV 系列
-python3 tools/create_factory_entry.py ./entry
-
-# GR IIIx Urban Edition 1.60
-python3 tools/create_factory_entry.py ./entry-urban --model gr3x-urban-160
-```
-
-GR IV 系列指南包含自动识别、备份、替换和恢复步骤，使用 FAT32 卡及与原图字节数相同的 720×480 JPEG。Urban 使用独立的两阶段安装方法，不能直接运行 GR IV 模板。
-
-替换前务必将原图另存到电脑，每台相机保留独立备份。执行后校验完整 SHA-256，并检查实际关机画面；空读回文件表示失败或未完成。结束后删除 `script/startup.ttl`，把 Script 设回 Disable。
-
-原有普通 GR IV 的 `*-goodbye.ttl.example` 模板仍使用 `GBBACK.JPG`，旧用户可以继续使用。不要与系列模板的备份名混用，也不要用于 HDF／Monochrome。已经改过且没有原图备份的相机，再次备份无法找回原图。
-
-### 工具与资料
-
-- [固件与关机图研究报告](docs/firmware-and-shutdown-image-research.md)
-- [Debug 模式与工厂菜单分析](docs/gr4-debug-mode-analysis.md)
-- [GR IV 系列机型识别](docs/gr4-model-identification.md)
-- [研究日志](docs/research-log.md)
-- [tools/](tools/)：固件检查、USB/MTP 探测、JPEG 处理及脚本生成器
-- [examples/](examples/)：TTL 模板
-
-直接复制 TTL 模板无需 Python。入口生成和基础分析使用 Python 3；GR IV 系列 Python 工具及整套测试需要 Python 3.10+，图片编码需要 Pillow，MTP 探测需要 PyUSB。
+自行取得固件文件。以下命令只检查或解码本地容器，不连接相机：
 
 ```sh
-python3 -m unittest discover -s tests -v  # Python 3.10+，需 Pillow
+python3 tools/inspect_firmware.py /path/to/fwdc248b.bin
+python3 tools/inspect_firmware.py /path/to/fwdc248b.bin --unpack /tmp/gr4-decoded.bin
 ```
+
+记录每项发现对应的机型、固件版本和样本 SHA-256。区分文件偏移与运行时地址、静态分析与实机观察。开发者指南提供已记录的 RTOS 映射及研究提交要求。
+
+仓库不分发固件、解包系统文件、机身读回数据或私人图稿，目前没有可安装的修改版固件或通用相机 SDK。电脑端测试不等于硬件模拟。
+
+### 功能扩展
+
+#### 自定义关机画面
+
+[关机图片流程](docs/extensions/README.md)包含 GR IV 系列及 GR IIIx Urban Edition 1.60 的备份、写入、读回和恢复指南。机型识别及目标路径已有实机依据；新组合模板及工具包装尚未整套上机验证。写入前为每台机身保留电脑端原图备份。
+
+### 仓库结构
+
+```text
+docs/
+  research/       研究索引、开发者入门、待研究问题
+  extensions/     功能扩展指南与实验
+  *.md            现有技术报告及实验日志
+tools/            离线分析、设备探测及操作包生成工具
+examples/         TTL 实验与功能扩展模板
+tests/            电脑端检查及脚本控制流模型
+```
+
+[文档目录](docs/README.md) · [工具说明](tools/README.md) · [示例说明](examples/README.md) · [贡献指南](CONTRIBUTING.md)
+
+### 开发与贡献
+
+整套测试需要 Python 3.10+ 和 Pillow，各分析工具的依赖见[工具说明](tools/README.md)。
+
+```sh
+python3 -m pip install Pillow
+python3 -m unittest discover -s tests -v
+```
+
+欢迎提交地址映射、格式说明、只读探针、可复现发现和功能实验。请附证据、验证范围及未解决问题，要求见[贡献指南](CONTRIBUTING.md)。
 
 ### 许可证
 
