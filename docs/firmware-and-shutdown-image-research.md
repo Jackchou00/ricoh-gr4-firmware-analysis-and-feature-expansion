@@ -81,6 +81,10 @@ Linux 根文件系统的 `/etc/inittab` 配置了 `ttyUSI0` 的 115200 波特率
 
 对自制小游戏而言，工程 shell 的 `SW_wait` 证明有读取部分机身按键事件的代码，屏幕模块有测试图和 DirectDraw 相关代码，Linux 命令桥提供了运行自编译程序的可能入口。但脚本/程序能否取得 LCD 的自由绘图权、稳定读取按键、从 SD 卡加载并安全退出仍未验证。TTL 脚本内的 `execcmnd` 只应按其脚本命令解释；它与工程 shell 的 `lcmd` 是两条不同路径。
 
+### TTL 文件操作的后续反馈
+
+[Issue #1](https://github.com/radium-wang/ricoh-gr4-firmware-analysis-and-feature-expansion/issues/1) 补充了存储卡相关的复制失败。观察与根因假设分开记录，详见[文件操作研究](research/gr4-ttl-filecopy-filesystems.md)。此前单机复制成功不应视为通用行为。
+
 ### 已验证的写入原理
 
 这不是通过 USB/MTP 直接挂载系统盘。USB 的只读调查没有发现上传文件的标准操作码。实际使用的是 SD 卡和机内工厂脚本功能：
