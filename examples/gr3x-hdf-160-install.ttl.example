@@ -1,0 +1,150 @@
+; License: see LICENSE (earlier Apache-2.0 grants remain in force)
+; GR IIIx HDF 1.60. Install only after complete Stage 0 and 1 readback checks.
+; The success path was run on one body; automatic rollback was not exercised.
+; Expected internal files: HD81NW.JPG candidate and HD41OL.JPG original backup.
+filestat 'C:\HDFLOG9.TXT' logsize
+if result <> 0 then
+exit
+endif
+if logsize <> 0 then
+exit
+endif
+fileopen log 'C:\HDFLOG9.TXT' 0
+if log < 0 then
+exit
+endif
+filewriteln log 'started'
+filewriteln log '1'
+error = 0
+attempted = 0
+restored = 0
+filewriteln log 'preflight_started'
+filewriteln log '1'
+fileclose log
+fileopen log 'C:\HDFLOG9.TXT' 1
+if log < 0 then
+exit
+endif
+filestat 'B:\Resource\Jpeg\HD81NW.JPG' checksize
+statresult = result
+if statresult <> 0 then
+error = 101
+goto done
+endif
+if checksize <> 7264 then
+error = 102
+goto done
+endif
+filestat 'B:\Resource\Jpeg\HD41OL.JPG' checksize
+statresult = result
+if statresult <> 0 then
+error = 103
+goto done
+endif
+if checksize <> 7264 then
+error = 104
+goto done
+endif
+filestat 'B:\Resource\Jpeg\GoodBye.jpg' checksize
+statresult = result
+if statresult <> 0 then
+error = 105
+goto done
+endif
+if checksize <> 7264 then
+error = 106
+goto done
+endif
+getfileattr 'B:\Resource\Jpeg\GoodBye.jpg'
+originalattr = result
+if originalattr < 0 then
+error = 107
+goto done
+endif
+filecopy 'B:\Resource\Jpeg\HD81NW.JPG' 'C:\HDFNW9.JPG'
+filestat 'C:\HDFNW9.JPG' checksize
+statresult = result
+if statresult <> 0 then
+error = 108
+goto done
+endif
+if checksize <> 7264 then
+error = 109
+goto done
+endif
+filecopy 'B:\Resource\Jpeg\HD41OL.JPG' 'C:\HDFOR9.JPG'
+filestat 'C:\HDFOR9.JPG' checksize
+statresult = result
+if statresult <> 0 then
+error = 110
+goto done
+endif
+if checksize <> 7264 then
+error = 111
+goto done
+endif
+filecopy 'B:\Resource\Jpeg\GoodBye.jpg' 'C:\HDFPRE9.JPG'
+filestat 'C:\HDFPRE9.JPG' checksize
+statresult = result
+if statresult <> 0 then
+error = 112
+goto done
+endif
+if checksize <> 7264 then
+error = 113
+goto done
+endif
+filewriteln log 'write_started'
+filewriteln log '1'
+fileclose log
+fileopen log 'C:\HDFLOG9.TXT' 1
+if log < 0 then
+exit
+endif
+attempted = 1
+filecopy 'B:\Resource\Jpeg\HD81NW.JPG' 'B:\Resource\Jpeg\GoodBye.jpg'
+filestat 'B:\Resource\Jpeg\GoodBye.jpg' checksize
+statresult = result
+if statresult <> 0 then
+error = 201
+goto rollback
+endif
+if checksize <> 7264 then
+error = 202
+goto rollback
+endif
+filecopy 'B:\Resource\Jpeg\GoodBye.jpg' 'C:\HDFRD9.JPG'
+filestat 'C:\HDFRD9.JPG' checksize
+statresult = result
+if statresult <> 0 then
+error = 203
+goto rollback
+endif
+if checksize <> 7264 then
+error = 204
+goto rollback
+endif
+getfileattr 'B:\Resource\Jpeg\GoodBye.jpg'
+if result <> originalattr then
+error = 205
+goto rollback
+endif
+goto done
+:rollback
+restored = 1
+filecopy 'B:\Resource\Jpeg\HD41OL.JPG' 'B:\Resource\Jpeg\GoodBye.jpg'
+filecopy 'B:\Resource\Jpeg\GoodBye.jpg' 'C:\HDFRS9.JPG'
+:done
+int2str value error
+filewriteln log 'error'
+filewriteln log value
+int2str value attempted
+filewriteln log 'attempted'
+filewriteln log value
+int2str value restored
+filewriteln log 'restored'
+filewriteln log value
+filewriteln log 'completed'
+filewriteln log '1'
+fileclose log
+exit

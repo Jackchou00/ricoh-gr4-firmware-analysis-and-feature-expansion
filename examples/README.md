@@ -19,6 +19,7 @@ See [identification evidence](../docs/gr4-model-identification.md) for the produ
 | `backup-gr4-family`, `write-gr4-family`, `restore-gr4-family` | [GR IV family](../docs/gr4-family-shutdown-workflow.md) · [中文](../docs/gr4-family-shutdown-workflow.zh-CN.md) |
 | `backup-goodbye`, `write-goodbye`, `restore-goodbye` | Standard GR IV only, `GBBACK.JPG`; see below / 仅普通 GR IV，使用 `GBBACK.JPG` |
 | `gr3x-urban-backup`, `gr3x-urban-restore` | [Urban 1.60](../docs/gr3x-urban-160-shutdown-image.md) |
+| `gr3x-hdf-160-backup`, `gr3x-hdf-160-install`, `gr3x-hdf-160-restore` | [GR IIIx HDF 1.60](../docs/gr3x-hdf-160-shutdown-image.md); restore wrapper and install rollback are untested / 恢复包装与安装回滚未实测 |
 
 ### Original standard GR IV templates / 普通 GR IV 旧模板
 
