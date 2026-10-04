@@ -14,6 +14,7 @@ Replace the camera's shutdown image through the TTL resource interface, with bac
 | --- | --- | --- |
 | GR IV, HDF, Monochrome | [English](../gr4-family-shutdown-workflow.md) · [中文](../gr4-family-shutdown-workflow.zh-CN.md) | Identification and target paths have three-body evidence; combined workflows are offline-tested / 识别和目标路径有三机型依据，组合流程仅离线测试 |
 | GR IIIx Urban Edition 1.60 | [Report and procedure / 报告与流程](../gr3x-urban-160-shutdown-image.md) | Replacement and restoration verified on one body; new wrappers are not fully camera-qualified / 单机替换及恢复已验证，新包装未整套实测 |
+| GR IIIx HDF 1.60 | [Report and examples / 报告与示例](../gr3x-hdf-160-shutdown-image.md) | Replacement and final readback verified on one body; restore wrapper untested / 单机替换与最终读回已验证，恢复包装未实测 |
 | Standard GR IV, original templates / 普通 GR IV 旧模板 | [Original report / 原始报告](../firmware-and-shutdown-image-research.md), [templates / 模板](../../examples/README.md) | Original copy workflow tested on one body; later guards have offline tests / 单机复制流程已验证，后加保护仅离线测试 |
 
 ### Entry and preparation / 入口与准备
@@ -23,11 +24,14 @@ Generate files on a computer, then follow the selected guide for copying them an
 ```sh
 python3 tools/create_factory_entry.py ./entry
 python3 tools/create_factory_entry.py ./entry-urban --model gr3x-urban-160
+python3 tools/create_factory_entry.py ./entry-hdf --model gr3x-hdf-160
 ```
 
-For the GR IV-family guide, copy `00078560.636` and `DEVELOP.MOD` to the SD-card root. With the camera off, hold MENU while powering on to enter the factory menu. Enable only Script, then shut down before removing the card. The family workflow uses FAT32; do not treat this entry method as universal firmware support.
+For the GR IV-family guide, copy `00078560.636` and `DEVELOP.MOD` to the SD-card root. With the camera off, hold MENU while powering on to enter the factory menu. Enable only Script, then shut down before removing the card. The family workflow uses FAT32; do not treat this entry method as universal firmware support. Urban and GR IIIx HDF entries are documented separately.
 
-GR IV 系列入口为卡根目录的 `00078560.636` 与 `DEVELOP.MOD`，关机时按住 MENU 开机进入工厂菜单，仅开启 Script，再关机取卡。系列流程使用 FAT32。Urban 的入口和后续传输方法不同，请按独立指南操作。
+GR IV 系列入口为卡根目录的 `00078560.636` 与 `DEVELOP.MOD`，关机时按住 MENU 开机进入工厂菜单，仅开启 Script，再关机取卡。系列流程使用 FAT32。Urban 和 GR IIIx HDF 使用各自记录的入口及传输方法，请按独立指南操作。
+
+本次 GR IIIx HDF 1.60 实机使用 `gr3x-hdf-160` 生成的入口文件；该入口只在一台 HDF 上验证。相同文件名和字节也用于 Urban 1.60，不表示后续资源路径或写入流程通用。
 
 ### Backup and verification / 备份与校验
 
